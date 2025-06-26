@@ -51,9 +51,15 @@ Demo videosu ektedir. (Alternatif olarak: [YouTube’da izle](#))
 ## Dosya Yapısı
 PasswordManager/
 │
+
 ├── Controllers/ → Account ve Passwords işlemleri
+
 ├── Models/ → EF Core Entity tanımları
+
 ├── Services/ → Kullanıcı ve parola işlemleri (bağımsız servis yapısı)
+
 ├── Views/ → Razor View dosyaları
+
 ├── Utilities/ → AES ve BCrypt gibi yardımcı sınıflar
+
 └── wwwroot/ → Bootstrap, JS, CSS içerikleri
