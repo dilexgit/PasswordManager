@@ -22,14 +22,6 @@ Kişisel parolalarınızı güvenli, düzenli ve erişilebilir şekilde yönetme
 -  Kategorilere göre parola gruplama  
 -  AES ile veri şifreleme, BCrypt ile kullanıcı doğrulama
 
----
-
-##  Demo
-
-Demo videosu ektedir. (Alternatif olarak: [YouTube’da izle](#))
-
----
-
 ##  Kurulum
 
 1. Bu repoyu klonlayın:
@@ -38,14 +30,12 @@ Demo videosu ektedir. (Alternatif olarak: [YouTube’da izle](#))
     ```
 2. Visual Studio ile açın.
 
-3. `appsettings.json` ya da `Web.config` dosyasındaki veritabanı bağlantı bilgisini düzenleyin.
-
-4. Migration oluşturmak için (Entity Framework Core):
+2. Migration oluşturmak için (Entity Framework Core):
     ```bash
     Add-Migration InitialCreate
     Update-Database
     ```
-5. Uygulamayı çalıştırın (`Ctrl + F5`)
+4. Uygulamayı çalıştırın (`Ctrl + F5`)
 
 
 ## Dosya Yapısı
