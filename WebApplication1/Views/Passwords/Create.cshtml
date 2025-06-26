@@ -1,0 +1,129 @@
+@model PasswordManagerMVC.Models.Password
+
+@{
+    ViewBag.Title = "Yeni Şifre Ekle";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Description)
+        @Html.TextBoxFor(m => m.Description, new { @class = "form-control" + (ViewData.ModelState["Description"] != null && ViewData.ModelState["Description"].Errors.Count > 0 ? " is-invalid" : "") })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.URL)
+        @Html.TextBoxFor(m => m.URL, new { @class = "form-control" + (ViewData.ModelState["URL"] != null && ViewData.ModelState["URL"].Errors.Count > 0 ? " is-invalid" : "") })
+        @Html.ValidationMessageFor(m => m.URL, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.CategoryId)
+        @Html.DropDownListFor(m => m.CategoryId, new SelectList(ViewBag.Categories, "Id", "Name"), "Kategori Seçin", new { @class = "form-control" + (ViewData.ModelState["CategoryId"] != null && ViewData.ModelState["CategoryId"].Errors.Count > 0 ? " is-invalid" : "") })
+        @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Username)
+        <div class="input-group">
+            @Html.TextBoxFor(m => m.Username, new { @class = "form-control" + (ViewData.ModelState["Username"] != null && ViewData.ModelState["Username"].Errors.Count > 0 ? " is-invalid" : ""), id = "usernameField" })
+        </div>
+        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EncryptedPassword)
+        <div class="input-group">
+            @Html.PasswordFor(m => m.EncryptedPassword, new
+            {
+                @class = "form-control" + (ViewData.ModelState["EncryptedPassword"] != null && ViewData.ModelState["EncryptedPassword"].Errors.Count > 0 ? " is-invalid" : ""),
+                id = "passwordField",
+                placeholder = "Şifre girin",
+                autocomplete = "new-password"
+            })
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#passwordField">
+                    <i class="far fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        @Html.ValidationMessageFor(m => m.EncryptedPassword, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Kaydet
+        </button>
+    </div>
+}
+
+<style>
+    .field-validation-error.text-danger {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .input-validation-error {
+        border-color: #dc3545 !important;
+    }
+
+    .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 0;
+        list-style: none;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Şifre göster/gizle
+        $('.toggle-password').click(function () {
+            const target = $(this).data('target');
+            const input = $(target);
+            const icon = $(this).find('i');
+
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+        $('.copy-btn').click(function () {
+            const target = $(this).data('target');
+            const input = $(target);
+
+            input.select();
+            document.execCommand('copy');
+
+            const icon = $(this).find('i');
+            icon.removeClass('fa-copy').addClass('fa-check');
+            setTimeout(() => {
+                icon.removeClass('fa-check').addClass('fa-copy');
+            }, 1500);
+        });
+    });
+</script>

@@ -1,0 +1,38 @@
+@model PasswordManagerMVC.Models.Login
+@{
+    ViewBag.Title = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm("Login", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.UserName, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.UserName, new
+        {
+            @class = "form-control",
+            placeholder = "Kullanıcı Adı girin",
+            autocomplete = "username"
+        })
+        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "control-label" })
+        @Html.PasswordFor(m => m.Password, new
+        {
+            @class = "form-control",
+            placeholder = "Şifrenizi girin",
+            autocomplete = "current-password"
+        })
+        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+}
+
+<p>Hesabınız yok mu? @Html.ActionLink("Kayıt Ol", "Register")</p>

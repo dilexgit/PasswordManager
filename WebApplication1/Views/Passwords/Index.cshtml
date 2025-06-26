@@ -1,0 +1,176 @@
+@model List<PasswordManagerMVC.Models.Password>
+
+@{
+    ViewBag.Title = "Şifrelerim";
+}
+
+<h2>Şifrelerim</h2>
+<div class="row mb-3">
+    <div class="col-md-8">
+        @using (Html.BeginForm("Index", "Passwords", FormMethod.Get, new { @class = "form-inline" }))
+        {
+        <div class="input-group" style="width: 100%;">
+            <input type="text" name="searchTerm" class="form-control" placeholder="Ara..." />
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Ara</button>
+            </div>
+        </div>
+        }
+    </div>
+    <div class="col-md-4 text-right">
+        @Html.ActionLink("Yeni Şifre Ekle", "Create", null, new { @class = "btn btn-success" })
+    </div>
+</div>
+<br />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tanım</th>
+            <th>URL</th>
+            <th>Kategori</th>
+            <th>Kullanıcı Adı</th>
+            <th>Şifre</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>@item.Description</td>
+            <td><a href="@item.URL" target="_blank">@item.URL</a></td>
+            <td>@item.Category.Name</td>
+            <td>
+                <div class="input-group" style="width: 200px;">
+                    <input type="text" class="form-control" value="@item.Username" id="username-@item.Id" readonly>
+
+                </div>
+            </td>
+            <td>
+                <div class="input-group" style="width: 200px;">
+                    <input type="password" class="form-control password-field" value="@item.EncryptedPassword" id="password-@item.Id" readonly>
+                    <div class="input-group-append">
+                        @*<button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="far fa-eye"></i>
+                            </button>*@
+                        <button class="btn btn-outline-secondary copy-btn" type="button" data-target="#password-@item.Id">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </td>
+            <td>
+                @Html.ActionLink("Düzenle", "Edit", new { id = item.Id }, new { @class = "btn btn-sm btn-warning" })
+                @Html.ActionLink("Sil", "Delete", new { id = item.Id }, new { @class = "btn btn-sm btn-danger" })
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success">
+    @TempData["SuccessMessage"]
+</div>
+}
+
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            $('.toggle-password').click(function () {
+                const input = $(this).closest('.input-group').find('.password-field');
+                const icon = $(this).find('i');
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            function copyToClipboard(targetSelector) {
+                const targetElement = $(targetSelector);
+                const tempInput = $('<input>');
+                $('body').append(tempInput);
+                tempInput.val(targetElement.val()).select();
+                document.execCommand('copy');
+                tempInput.remove();
+
+                const button = $(`button[data-target="${targetSelector}"]`);
+                const icon = button.find('i');
+                icon.removeClass().addClass('fas fa-check');
+                setTimeout(() => icon.removeClass('fa-check').addClass('fa-copy'), 1500);
+            }
+
+            function showPasswordVerifyAlert(targetSelector) {
+                Swal.fire({
+                    title: 'Şifre Doğrulama',
+                    html: `
+                        <p>Bu işlemi gerçekleştirmek için lütfen şifrenizi girin:</p>
+                        <input id="swal-input-password" type="password" class="swal2-input" placeholder="Şifre">
+                        @Html.AntiForgeryToken()
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Doğrula',
+                    cancelButtonText: 'İptal',
+                    preConfirm: () => {
+                        const password = $('#swal-input-password').val();
+
+                        if (!password) {
+                            Swal.showValidationMessage('Şifre gerekli');
+                            return false;
+                        }
+
+                        const data = {
+                            UserName: '@User.Identity.Name', 
+                            Password: password,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        };
+
+                        return fetch('/Account/Verify', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Doğrulama başarısız');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data || !data.success) {
+                                throw new Error(data?.message || 'Geçersiz şifre');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(error.message);
+                            return false;
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value && result.value.success) {
+                        copyToClipboard(targetSelector);
+                    }
+                });
+            }
+
+            $('.copy-btn').click(function (e) {
+                e.preventDefault();
+                const targetSelector = $(this).data('target');
+                showPasswordVerifyAlert(targetSelector);
+            });
+        });
+    </script>
+}
